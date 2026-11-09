@@ -1,0 +1,50 @@
+zona,uso,parametro,valor,unidade,tipo_valor,nota,fonte,pagina
+ZRC,RUB,taxa_ocupacao_terreo,50,%,numero,,Anexo II,1
+ZRC,RUB,taxa_ocupacao_demais,50,%,numero,,Anexo II,1
+ZRC,RUB,ca_basico,1,,numero,,Anexo II,1
+ZRC,RUB,ca_maximo,,,nao_definido,,Anexo II,1
+ZRC,RUB,gabarito,2,pav,numero,(b) admite 3 pavimentos se a inclinação do terreno for acima de 15%,Anexo II,1
+ZRC,RUB,permeabilidade_min,20,%,numero,,Anexo II,1
+ZRC,RUB,recuo_frontal,5,m,numero,,Anexo II,1
+ZR-2,RUB,taxa_ocupacao_terreo,70,%,numero,,Anexo II,3
+ZR-2,RUB,taxa_ocupacao_demais,70,%,numero,,Anexo II,3
+ZR-2,RUB,ca_basico,1.3,,numero,,Anexo II,3
+ZR-2,RUB,ca_maximo,,,nao_definido,,Anexo II,3
+ZR-2,RUB,gabarito,,pav,nao_definido,,Anexo II,3
+ZR-2,RUB,permeabilidade_min,20,%,numero,,Anexo II,3
+ZR-2,RUB,recuo_frontal,5,m,numero,,Anexo II,3
+ZUM-1,RUB,taxa_ocupacao_terreo,70,%,numero,,Anexo II,5
+ZUM-1,RUB,taxa_ocupacao_demais,70,%,numero,,Anexo II,5
+ZUM-1,RUB,ca_basico,1.3,,numero,,Anexo II,5
+ZUM-1,RUB,ca_maximo,,,nao_definido,,Anexo II,5
+ZUM-1,RUB,gabarito,,pav,nao_definido,,Anexo II,5
+ZUM-1,RUB,permeabilidade_min,20,%,numero,,Anexo II,5
+ZUM-1,RUB,recuo_frontal,5,m,numero,,Anexo II,5
+ZUM-1,RMV,taxa_ocupacao_terreo,70,%,numero,,Anexo II,5
+ZUM-1,RMV,taxa_ocupacao_demais,70,%,numero,,Anexo II,5
+ZUM-1,RMV,ca_basico,3,,numero,,Anexo II,5
+ZUM-1,RMV,ca_maximo,,,nao_definido,,Anexo II,5
+ZUM-1,RMV,gabarito,8,pav,numero,,Anexo II,5
+ZUM-1,RMV,permeabilidade_min,20,%,numero,,Anexo II,5
+ZUM-1,RMV,recuo_frontal,5,m,numero,(a) acima de 9 m de altura: R = H/10,Anexo II,5
+ZC-1,RUB,taxa_ocupacao_terreo,70,%,numero,,Anexo II,7
+ZC-1,RUB,taxa_ocupacao_demais,70,%,numero,,Anexo II,7
+ZC-1,RUB,ca_basico,1.2,,numero,,Anexo II,7
+ZC-1,RUB,ca_maximo,,,nao_definido,,Anexo II,7
+ZC-1,RUB,gabarito,,pav,nao_definido,,Anexo II,7
+ZC-1,RUB,permeabilidade_min,20,%,numero,,Anexo II,7
+ZC-1,RUB,recuo_frontal,5,m,numero,,Anexo II,7
+ZC-1,RMV,taxa_ocupacao_terreo,100,%,numero,(b) computado sobre a área livre do terreno respeitados recuos e área permeável,Anexo II,7
+ZC-1,RMV,taxa_ocupacao_demais,60,%,numero,,Anexo II,7
+ZC-1,RMV,ca_basico,3,,numero,,Anexo II,7
+ZC-1,RMV,ca_maximo,5.5,,numero,(c) com Outorga Onerosa; (f) pode aumentar pelos incentivos do Art. 58,Anexo II,7
+ZC-1,RMV,gabarito,,pav,nao_definido,,Anexo II,7
+ZC-1,RMV,permeabilidade_min,20,%,numero,,Anexo II,7
+ZC-1,RMV,recuo_frontal,5,m,numero,(d) acima de 9 m de altura: R = H/10,Anexo II,7
+ZEU-RES,RUB,taxa_ocupacao_terreo,50,%,numero,,Anexo II,17
+ZEU-RES,RUB,taxa_ocupacao_demais,50,%,numero,,Anexo II,17
+ZEU-RES,RUB,ca_basico,1,,numero,,Anexo II,17
+ZEU-RES,RUB,ca_maximo,,,nao_definido,,Anexo II,17
+ZEU-RES,RUB,gabarito,2,pav,numero,,Anexo II,17
+ZEU-RES,RUB,permeabilidade_min,25,%,numero,,Anexo II,17
+ZEU-RES,RUB,recuo_frontal,5,m,numero,,Anexo II,17
