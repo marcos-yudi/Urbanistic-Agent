@@ -134,3 +134,12 @@ def test_recortar_pagina_rejeita_pagina_inexistente(tmp_path):
     assert extract.recortar_pagina(caminho, 1).startswith(b"%PDF")
     with pytest.raises(ValueError):
         extract.recortar_pagina(caminho, 2)
+
+
+def test_zonas_mvp_batem_com_o_gabarito():
+    """Toda zona do --todas tem gabarito na mesma página, e vice-versa."""
+    import csv
+
+    with open("data/gold/gabarito.csv", encoding="utf-8", newline="") as arquivo:
+        gold = {(r["zona"], int(r["pagina"])) for r in csv.DictReader(arquivo)}
+    assert set(extract.ZONAS_MVP.items()) == gold

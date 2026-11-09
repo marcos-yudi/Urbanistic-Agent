@@ -5,7 +5,7 @@ Fluxo: recorta a página do PDF → envia ao Gemini com o prompt versionado → 
 válido é aproveitado e cada célula inválida vira uma falha registrada no log (nunca um valor
 inventado). Na avaliação, a célula com falha conta como ``nao_extraido``.
 
-Uso: ``python -m urbanistico.extract --zona ZRC --pagina 1``
+Uso: ``python -m urbanistico.extract --zona ZRC --pagina 1`` ou ``--todas`` (zonas do MVP)
 """
 
 import argparse
@@ -26,6 +26,9 @@ PASTA_PROMPTS = Path("prompts")
 PASTA_SAIDA = Path("data/output")
 FONTE = "Anexo II"
 COLUNAS_CSV = list(RegistroParametro.model_fields)
+
+# Zonas do MVP → página do quadro no Anexo II (uma zona por página).
+ZONAS_MVP: dict[str, int] = {"ZRC": 1, "ZR-2": 3, "ZUM-1": 5, "ZC-1": 7, "ZEU-RES": 17}
 
 log = logging.getLogger(__name__)
 
@@ -186,20 +189,29 @@ def salvar_falhas(falhas: list[dict], caminho: Path) -> None:
         escritor.writerows(falhas)
 
 
+def extrair_e_salvar(zona: str, pagina: int, versao_prompt: str = "v1") -> None:
+    registros, falhas = extrair_zona(zona, pagina, versao_prompt)
+    saida = PASTA_SAIDA / f"extracao_{zona}.csv"
+    salvar_csv(registros, saida)
+    salvar_falhas(falhas, PASTA_SAIDA / f"falhas_{zona}.csv")
+    print(f"{zona}: {len(registros)} registros válidos → {saida}; {len(falhas)} falhas")
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extrai um quadro do Anexo II com o LLM.")
-    parser.add_argument("--zona", required=True)
-    parser.add_argument("--pagina", type=int, required=True)
+    parser = argparse.ArgumentParser(description="Extrai quadros do Anexo II com o LLM.")
+    grupo = parser.add_mutually_exclusive_group(required=True)
+    grupo.add_argument("--zona", help="uma zona (exige --pagina)")
+    grupo.add_argument("--todas", action="store_true", help="todas as zonas do MVP")
+    parser.add_argument("--pagina", type=int)
     parser.add_argument("--prompt", default="v1", help="versão do prompt (ex.: v1)")
     args = parser.parse_args()
+    if args.zona and args.pagina is None:
+        parser.error("--zona exige --pagina")
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    registros, falhas = extrair_zona(args.zona, args.pagina, args.prompt)
-
-    saida = PASTA_SAIDA / f"extracao_{args.zona}.csv"
-    salvar_csv(registros, saida)
-    salvar_falhas(falhas, PASTA_SAIDA / f"falhas_{args.zona}.csv")
-    print(f"{len(registros)} registros válidos → {saida}; {len(falhas)} falhas")
+    zonas = ZONAS_MVP if args.todas else {args.zona: args.pagina}
+    for zona, pagina in zonas.items():
+        extrair_e_salvar(zona, pagina, args.prompt)
 
 
 if __name__ == "__main__":
