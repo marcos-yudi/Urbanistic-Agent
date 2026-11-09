@@ -1,66 +1,130 @@
 <!--
-extracao_v1 — RASCUNHO escrito pelo Claude para revisão do Yudi (autoria: Yudi).
+extracao_v1. Reescrito pelo Claude a pedido do Yudi (autoria: Yudi). Ainda não foi avaliado.
 Uso: enviado junto com UMA página do Anexo II (PDF) ao Gemini; a saída segue o JSON Schema
 de ExtracaoZona (src/urbanistico/schema.py). Os placeholders {zona} e {pagina} são preenchidos
-pelo extract.py. Não usar valores do gabarito como exemplo aqui (vazaria a avaliação).
+pelo extract.py. Os exemplos usam valores FICTÍCIOS de propósito: não colocar aqui valores
+reais do gabarito, porque isso vazaria a avaliação.
 -->
 
-Você é um extrator de dados de legislação urbanística. A página anexada é um quadro do
-Anexo II da Lei nº 13.905/2024 de Londrina, com os parâmetros de ocupação da zona **{zona}**
-(página {pagina}).
+# Papel
 
-## Tarefa
+Você transcreve tabelas de legislação urbanística para JSON. É um trabalho de **cópia fiel**,
+não de interpretação: cada número da saída precisa estar escrito, literalmente, na célula
+correspondente do quadro. Um número inventado é o pior erro possível. Um valor ausente é
+aceitável.
 
-Para cada linha de uso do quadro, extraia exatamente 7 parâmetros e devolva o JSON pedido.
+# Documento
 
-### Linhas do quadro → campo `linha`
+A página anexada é um quadro do **Anexo II da Lei nº 13.905/2024 de Londrina** com os parâmetros
+de ocupação da zona **{zona}** (página {pagina}). O quadro tem:
 
-- `RES-RUB`: linha residencial de Unifamiliar ou Bifamiliar (RUB) e Multifamiliar em Condomínio (RMC-RUB).
-- `RES-RMV`: linha residencial de Multifamiliar vertical (RMV) e Multifamiliar em Condomínio (RMC-RMV / RCM-RMV).
-  **Só inclua se o quadro tiver essa linha.**
-- `NAO-RES`: linha não residencial (Misto (M), CS-*, Ind-*, IPP etc.).
+- um título com o nome da zona;
+- à esquerda, o bloco **USO(S)**, com as linhas de uso (RESIDENCIAL e NÃO-RESIDENCIAL);
+- à direita, o bloco **OCUPAÇÃO**, com cabeçalho em dois níveis (grupo e subcoluna);
+- abaixo, as **notas de rodapé**, cada uma com uma letra: (a), (b), (c)…
 
-Não crie linhas que não existam no quadro e não repita linhas.
+A quantidade e a ordem das colunas **variam entre quadros**. Alguns têm uma coluna
+"NÃO PERMITIDOS" e outros não. Por isso, localize cada coluna **pelo texto do cabeçalho**,
+nunca pela posição.
 
-### Colunas do quadro → parâmetros
+# Passo 1: identificar as linhas do quadro
 
-| parâmetro | coluna do quadro |
-|---|---|
-| `taxa_ocupacao_terreo` | Taxa de ocupação máxima (%) → "subsolo, térreo e 1º pav" |
-| `taxa_ocupacao_demais` | Taxa de ocupação máxima (%) → "demais pav." |
-| `ca_basico` | Coeficiente de Aproveitamento (CA) → "básico" |
-| `ca_maximo` | Coeficiente de Aproveitamento (CA) → "máximo" |
-| `gabarito` | Gabarito máximo (pav.) |
-| `permeabilidade_min` | Taxa de Permeabilidade mínima (%) |
-| `recuo_frontal` | Recuo mínimo (m) |
+Cada linha do quadro vira um item de `linhas`, com o campo `linha`:
 
-Ignore as demais colunas: lote mínimo/máximo, frentes, unidade autônoma, **CA mínimo**,
-afastamentos lateral e de fundos e as colunas de usos (permitidos, permissíveis, não permitidos).
-Cuidado com o CA: são três colunas lado a lado (mínimo, básico, máximo); o básico é a do meio.
+| `linha`   | como reconhecer no quadro                                                                 |
+| --------- | ----------------------------------------------------------------------------------------- |
+| `RES-RUB` | linha RESIDENCIAL com "Unifamiliar ou Bifamiliar (RUB)" e/ou "Multifamiliar em Condomínio (RMC-RUB)" |
+| `RES-RMV` | linha RESIDENCIAL com "Multifamiliar vertical (RMV)" e/ou "(RMC-RMV)" / "(RCM-RMV)"       |
+| `NAO-RES` | linha NÃO-RESIDENCIAL (Misto (M), CS-a, CS-b…, Ind-a…, IPP etc.)                           |
 
-### Regras de valor
+- Inclua **só as linhas que existem** no quadro. Muitos quadros não têm `RES-RMV`; nesse caso,
+  não crie essa linha.
+- Nunca repita uma linha nem junte duas linhas em uma.
+- Uma linha do quadro pode ocupar várias linhas de texto ou ter sub-células na coluna de usos
+  (ex.: vários usos permissíveis empilhados). Os valores de ocupação são os mesmos para a linha
+  inteira.
 
-1. Célula com número → `tipo_valor: "numero"` e `valor` com o número.
-   - O documento usa vírgula decimal: `1,3` → `1.3`. Ponto de milhar: `62.500` → `62500`.
-   - Percentuais sem o símbolo: `70` (não `0.7`).
-2. Célula com traço ("-" ou "–") → `tipo_valor: "nao_definido"` e `valor: null`.
-   O traço **não** significa zero nem "sem limite".
-3. **Nunca invente nem deduza um número.** Use apenas o que está escrito na célula. Não copie
-   valor de outra linha, de outra coluna ou do texto das notas. Se a célula estiver ilegível,
-   use `nao_definido` e explique em `nota` que a célula não pôde ser lida.
+# Passo 2: localizar as 7 colunas
 
-### Notas de rodapé → campo `nota`
+| parâmetro              | grupo do cabeçalho                  | subcoluna                        |
+| ---------------------- | ----------------------------------- | -------------------------------- |
+| `taxa_ocupacao_terreo` | Taxa de ocupação máxima (%)         | "subsolo, térreo e 1º pav"       |
+| `taxa_ocupacao_demais` | Taxa de ocupação máxima (%)         | "demais pav."                    |
+| `ca_basico`            | Coeficiente de Aproveitamento (CA)  | "básico" (a do **meio**)         |
+| `ca_maximo`            | Coeficiente de Aproveitamento (CA)  | "máximo" (a da **direita**)      |
+| `gabarito`             | Gabarito máximo (pav.)              | (coluna única)                   |
+| `permeabilidade_min`   | Taxa de Permeabilidade mínima (%)   | (coluna única)                   |
+| `recuo_frontal`        | Recuo mínimo (m)                    | (coluna única)                   |
 
-- Se a célula do parâmetro tiver uma letra entre parênteses, como "(a)" ou "(b)", preencha
-  `nota` com a letra seguida do texto do rodapé correspondente. Ex.: `"(x) texto da nota x"`.
-  Se a nota for longa, resuma o trecho que se aplica ao parâmetro (ex.: só a fórmula do recuo).
-- Várias letras na mesma célula → junte-as separadas por `; `.
-- Só atribua a nota ao parâmetro em cuja **célula** a letra aparece. Letras ao lado de nomes de
-  uso (ex.: "IPP (a)") ou em colunas ignoradas **não** vão para nenhum parâmetro.
-- Sem letra na célula → `nota: null`.
+Armadilhas comuns:
 
-### Campos da zona
+- **CA:** o grupo tem três subcolunas na ordem mínimo, básico, máximo. A "mínimo" fica fora do
+  escopo e nunca vai para `ca_basico`.
+- **Recuo × Afastamento:** "Recuo mínimo (m)" é uma coluna; "Afastamento mínimo (m)" (lateral e
+  fundos) é outra, logo à direita, e fica fora do escopo.
+- **Ignore por completo:** usos (permitidos, permissíveis, não permitidos), lote mínimo/máximo,
+  frente mínima, unidade autônoma, frente mínima UA, CA mínimo e afastamentos.
+
+# Passo 3: ler cada célula
+
+Para cada linha (Passo 1) × parâmetro (Passo 2), olhe **somente** a interseção dessa linha com
+essa coluna.
+
+| a célula contém                    | `tipo_valor`     | `valor`      |
+| ---------------------------------- | ---------------- | ------------ |
+| um número (com ou sem letra de nota) | `"numero"`     | o número     |
+| só um traço ("-" ou "–")           | `"nao_definido"` | `null`       |
+| ilegível, vazia ou ambígua         | `"nao_definido"` | `null`, com o motivo em `nota` |
+
+Formato do número:
+
+- A vírgula é o separador decimal: `2,7` → `2.7`.
+- O ponto é o separador de milhar: `12.400` → `12400`.
+- Percentual sai sem o símbolo e sem converter: `45` (e não `0.45`).
+- A letra da nota **não** faz parte do número: `"4 (x)"` → `valor: 4`.
+
+O que **nunca** fazer:
+
+- Trocar um traço por zero, por um número "típico" ou pelo valor de outra linha.
+- Copiar o valor de uma linha vizinha porque "deve ser igual". Linhas diferentes podem ter
+  valores diferentes; leia cada célula.
+- Tirar um número do texto das notas. Ex.: se a nota diz "admite-se 4 pavimentos", o
+  `gabarito` continua sendo o que está na célula.
+- Calcular, arredondar ou completar valores.
+
+# Passo 4: notas de rodapé → campo `nota`
+
+1. Procure letras entre parênteses **dentro da célula do parâmetro**. Normalmente ficam logo
+   abaixo do número, em negrito.
+2. Para cada letra, encontre a nota de rodapé com a mesma letra e escreva
+   `"(letra) texto"`. Se a nota for longa ou tratar de vários parâmetros, resuma **só o trecho
+   que se aplica a este parâmetro**. Ex.: de uma nota com fórmulas de recuo e de afastamentos,
+   `recuo_frontal` fica só com a fórmula do recuo.
+3. Várias letras na mesma célula → em ordem alfabética, separadas por `"; "`.
+   Ex.: `"(m) texto da nota m; (p) texto da nota p"`.
+4. Sem letra na célula → `nota: null`.
+
+Letras que **não** vão para nenhum parâmetro:
+
+- letras ao lado do nome de um uso (ex.: "IPP (k)");
+- letras em colunas ignoradas (ex.: "(k)" na coluna de lote máximo).
+
+Copie a letra exatamente como aparece no quadro. Não deduza qual nota "deveria" se aplicar.
+
+# Passo 5: conferir antes de responder
+
+- [ ] Só as linhas que existem no quadro, sem repetição.
+- [ ] As 7 chaves de parâmetro presentes em toda linha.
+- [ ] Todo `"numero"` tem `valor`; todo `"nao_definido"` tem `valor: null`.
+- [ ] Cada número aparece literalmente naquela célula (releia as colunas de CA e de recuo).
+- [ ] Toda `nota` começa com uma letra que aparece na própria célula.
+
+# Saída
+
+Responda apenas com o JSON no schema fornecido:
 
 - `zona`: `"{zona}"`
 - `pagina`: `{pagina}`
 - `fonte`: `"Anexo II"`
+- `linhas`: os itens do Passo 1, cada um com `linha` e os 7 parâmetros no formato
+  `{"valor": …, "tipo_valor": …, "nota": …}`.
