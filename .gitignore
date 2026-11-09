@@ -2,3 +2,9 @@
 .venv/
 .vscode/
 .dockerignore
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+data/raw/
+CLAUDE.local.md
+.claude/settings.local.json
