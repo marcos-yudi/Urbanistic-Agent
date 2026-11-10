@@ -1,10 +1,22 @@
+# Ambiente e segredos
 .env
 .venv/
 .vscode/
 .dockerignore
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Cache
 __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
-data/raw/
-CLAUDE.local.md
-.claude/settings.local.json
+
+# Dados brutos (PDFs da prefeitura): ficam só no disco/GCS.
+# Mantidos no git: a pasta (.gitkeep) e o link de origem da lei (referencias).
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/referencias
+
+# Saídas geradas pelo pipeline
+data/output/
+logs/
