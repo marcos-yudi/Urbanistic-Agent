@@ -33,12 +33,13 @@ tests/
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+pip install -e . --no-deps  # pacote urbanistico em modo editável
 pytest                      # testes
 ruff check . && ruff format .
 python -m urbanistico.evaluate   # acurácia contra o gabarito
 ```
 
-Após instalar uma biblioteca nova: `pip freeze > requirements.txt`.
+Após instalar uma biblioteca nova: `pip freeze --exclude-editable > requirements.txt` (sem o `--exclude-editable`, o próprio pacote entra no arquivo como `-e git+...`). Se o código passar a importar a biblioteca, inclua-a também em `dependencies` no `pyproject.toml`.
 
 ## Modelo de dados
 
