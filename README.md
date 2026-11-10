@@ -146,7 +146,8 @@ Requisitos: Python 3.13 e uma chave do [Google AI Studio](https://aistudio.googl
 ```bash
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements.txt    # versões exatas do ambiente
+pip install -e . --no-deps         # instala o pacote urbanistico (código em src/)
 ```
 
 Crie um `.env` na raiz (ele fica fora do git):
@@ -163,11 +164,6 @@ Baixe o Anexo II na [fonte](https://www.cml.pr.gov.br/proposicoes/Leis/0/9/0/222
 `data/raw/ANEXO II.pdf`. Os PDFs não ficam no git.
 
 ```bash
-# Linux/macOS
-export PYTHONPATH=src
-# Windows (PowerShell)
-$env:PYTHONPATH="src"
-
 python -m urbanistico.extract --todas                 # as 5 zonas do MVP
 python -m urbanistico.extract --zona ZRC --pagina 1   # uma zona
 python -m urbanistico.evaluate                        # métricas contra o gabarito
