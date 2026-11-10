@@ -36,7 +36,7 @@ Quem tem `jobUser` consegue gastar processamento do BigQuery. Há três barreira
 1. `maximum_bytes_billed` no `QueryJobConfig` de toda consulta feita pelo código (ex.: 100 MB).
    A consulta que passar disso falha sem cobrar.
 2. Uma cota personalizada no projeto: *BigQuery API → Query usage per day* (ex.: 10 GB/dia).
-3. O corte de faturamento em R$ 45, a última barreira (a ser documentado em `docs/gcp_custos.md`).
+3. O corte de faturamento em R$ 45, a última barreira (`docs/gcp_custos.md` e `docs/gcp_corte_faturamento.md`).
 
 ## Como aplicar
 
@@ -156,7 +156,7 @@ gcloud projects get-iam-policy $PROJETO --flatten="bindings[].members" \
 ## Fora deste documento
 
 - A conta da Cloud Run function que corta o faturamento precisa de `roles/billing.projectManager`
-  (ou `billing.admin` na conta de faturamento). Isso fica em `docs/gcp_custos.md`.
+  (ou `billing.admin` na conta de faturamento). Comandos em `docs/gcp_corte_faturamento.md`.
 - A chave do Gemini (`GEMINI_API_KEY`) não é IAM do GCP: fica no `.env` local e, no Cloud Run e no
   Actions, no Secret Manager ou nos *secrets* do GitHub. Nesse caso, a conta que lê o segredo
   precisa de `roles/secretmanager.secretAccessor` só naquele segredo.

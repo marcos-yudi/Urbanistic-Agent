@@ -69,6 +69,8 @@ Orçamento (BRL) ──► tópico Pub/Sub ──► Cloud Run function ──�
 
 ## Checklist antes de ligar o GCP
 
+Comandos, código da função e roteiro de teste: [`gcp_corte_faturamento.md`](gcp_corte_faturamento.md).
+
 - [ ] Conta de faturamento em BRL
 - [ ] Orçamento de R$ 50/mês ligado a um tópico Pub/Sub
 - [ ] Função de corte com `LIMITE_CORTE = 45` e a conta de serviço com permissão mínima
