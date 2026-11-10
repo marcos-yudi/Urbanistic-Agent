@@ -45,7 +45,7 @@ Os comandos abaixo rodam uma vez, ao configurar o projeto. Ajuste as variáveis 
 ```bash
 PROJETO=meu-projeto-gcp
 NUMERO_PROJETO=$(gcloud projects describe $PROJETO --format='value(projectNumber)')
-REGIAO=southamerica-east1
+REGIAO=us-central1   # região com nível gratuito (ver gcp_custos.md)
 BUCKET=gs://$PROJETO-pdfs
 REPO_GITHUB=MarcosYudi/Urbanistic-Agent
 
@@ -137,20 +137,27 @@ O `--min-instances=0` deixa o serviço escalar a zero, em linha com a regra de c
 Para fazer os testes como cada conta, a sua conta pessoal precisa de
 `roles/iam.serviceAccountTokenCreator` nelas.
 
+O `bq` usa a personificação configurada no `gcloud`. Lembre de desfazê-la no fim.
+
 ```bash
 # sa-agente: a leitura funciona...
-bq query --impersonate_service_account=$SA_AGENTE --use_legacy_sql=false \
+gcloud config set auth/impersonate_service_account $SA_AGENTE
+bq query --use_legacy_sql=false \
   "SELECT COUNT(*) FROM \`$PROJETO.urbanistico.parametros\`"
 # ...e a escrita precisa FALHAR com "Access Denied".
-bq query --impersonate_service_account=$SA_AGENTE --use_legacy_sql=false \
+bq query --use_legacy_sql=false \
   "DELETE FROM \`$PROJETO.urbanistico.parametros\` WHERE FALSE"
 
 # sa-pipeline: não pode criar dataset novo (precisa FALHAR).
-bq mk --impersonate_service_account=$SA_PIPELINE --dataset $PROJETO:teste_indevido
+gcloud config set auth/impersonate_service_account $SA_PIPELINE
+bq mk --dataset $PROJETO:teste_indevido
 
-# No nível do projeto, as duas contas devem ter só roles/bigquery.jobUser.
+gcloud config unset auth/impersonate_service_account
+
+# No nível do projeto, sa-pipeline e sa-agente devem ter só roles/bigquery.jobUser.
 gcloud projects get-iam-policy $PROJETO --flatten="bindings[].members" \
-  --filter="bindings.members:sa-" --format="table(bindings.role, bindings.members)"
+  --filter="bindings.members:(sa-pipeline OR sa-agente)" \
+  --format="table(bindings.role, bindings.members)"
 ```
 
 ## Fora deste documento
