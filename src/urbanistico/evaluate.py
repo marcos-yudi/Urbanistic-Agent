@@ -65,8 +65,11 @@ def classificar_registro(gold: RegistroParametro, extraido: RegistroParametro | 
 
 
 def letras_da_nota(nota: str | None) -> set[str]:
-    """'(c) com Outorga; (f) incentivos' → {'c', 'f'}."""
-    return set(re.findall(r"\(([a-z])\)", nota or "", flags=re.IGNORECASE))
+    """'(c) com Outorga; (f) incentivos' → {'c', 'f'}.
+
+    Só letras minúsculas: as notas do Anexo II são (a), (b)... e o texto da nota pode ter
+    variáveis entre parênteses, como "altura (H)", que não são letras de nota."""
+    return set(re.findall(r"\(([a-z])\)", nota or ""))
 
 
 def avaliar(gold: dict[Chave, RegistroParametro], extracao: dict[Chave, RegistroParametro]) -> dict:

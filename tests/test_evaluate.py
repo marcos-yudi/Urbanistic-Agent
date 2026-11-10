@@ -45,6 +45,12 @@ def test_letras_da_nota():
     assert letras_da_nota(None) == set()
 
 
+def test_letras_da_nota_ignora_variavel_maiuscula():
+    # Caso real (ZC-1, recuo): "(H)" é a altura da edificação, não uma nota.
+    nota = "(d) Acima da altura (H) de 9,00m, Recuo: R= H/10"
+    assert letras_da_nota(nota) == {"d"}
+
+
 def test_avaliar_filtra_zonas_e_calcula_taxas():
     gold_regs = [
         _reg(1.0, Parametro.CA_BASICO),
