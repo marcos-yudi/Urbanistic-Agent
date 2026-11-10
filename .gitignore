@@ -20,3 +20,7 @@ data/raw/*
 # Saídas geradas pelo pipeline
 data/output/
 logs/
+
+# Build do pacote (pip install -e .)
+*.egg-info/
+build/
